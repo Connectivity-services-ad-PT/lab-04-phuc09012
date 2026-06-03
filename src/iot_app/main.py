@@ -14,18 +14,22 @@ class ReadingRequest(BaseModel):
     device_id: str = Field(..., min_length=3, examples=["ESP32-LAB-A01"])
     metric: str = Field("temperature", examples=["temperature"])
     value: float = Field(..., ge=-40.0, le=80.0, examples=[31.5])  # Boundary: -40 đến 80
-    unit: str = Field("celsius", examples=["celsius"])
+    unit: str = Field("Celsius", examples=["celsius"])
     timestamp: str = Field(..., examples=["2026-05-13T08:30:00+07:00"])
 
-# 2. Endpoint GET /health (Bắt buộc phải có để Docker check trạng thái sống chết)
+# 2. Endpoint GET /health 
 @app.get("/health", status_code=status.HTTP_200_OK)
 def health_check():
     return {"status": "ok", "service": "iot-ingestion"}
 
-# 3. Endpoint POST /readings (Nhận và xử lý dữ liệu cảm biến thật)
+# 3. Endpoint HEAD /health (Bổ sung để trả lời thằng wait-on của cô Trang)
+@app.head("/health", status_code=status.HTTP_200_OK)
+def health_check_head():
+    return None
+
+# 4. Endpoint POST /readings
 @app.post("/readings", status_code=status.HTTP_200_OK)
 def create_reading(payload: ReadingRequest):
-    # Trả về đúng cấu trúc success giống như mô tả đề bài
     return {
         "status": "success",
         "message": "Data ingested successfully",
