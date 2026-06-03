@@ -16,8 +16,5 @@ USER appuser
 
 EXPOSE 8000
 
-# Chỉ định rõ PYTHONPATH để Python tìm thấy module iot_app bên trong src
-ENV PYTHONPATH=/home/appuser/src
-
-# Lệnh khởi chạy API chuẩn đét không bao giờ sập ngầm
-CMD ["uvicorn", "iot_app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Thêm tham số --app-dir để ép Uvicorn nhảy thẳng vào thư mục src tìm module
+CMD ["uvicorn", "iot_app.main:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000"]
