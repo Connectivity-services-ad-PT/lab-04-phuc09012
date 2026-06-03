@@ -1,21 +1,23 @@
 FROM python:3.11-slim
 
-# Tạo một user non-root tên là appuser để chạy app bảo mật (tránh lỗi hack quyền root)
+# Tạo user non-root để chạy app bảo mật
 RUN useradd --create-home appuser
 WORKDIR /home/appuser
 
-# Copy và cài đặt thư viện trước để tối ưu hóa bộ nhớ đệm (Docker Layer Caching)
+# Cài đặt dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy toàn bộ mã nguồn của thư mục src vào container
-COPY src/ ./src
+# Copy source code vào đúng thư mục làm việc
+COPY src/ /home/appuser/src/
 
-# Chuyển quyền chạy container từ root sang user thường
+# Chuyển sang dùng user non-root
 USER appuser
 
-# Mở cổng 8000 trong container để đón request từ ngoài vào
 EXPOSE 8000
 
-# Lệnh khởi chạy API Uvicorn bên trong container
-CMD ["uvicorn", "iot_app.main:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000"]
+# Chỉ định rõ PYTHONPATH để Python tìm thấy module iot_app bên trong src
+ENV PYTHONPATH=/home/appuser/src
+
+# Lệnh khởi chạy API chuẩn đét không bao giờ sập ngầm
+CMD ["uvicorn", "iot_app.main:app", "--host", "0.0.0.0", "--port", "8000"]
